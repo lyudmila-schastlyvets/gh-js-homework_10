@@ -8,11 +8,30 @@ export default class App extends React.Component {
   constructor (props) {
     super(props);
     this.state = {
+      id: '',
       itemArray: [],
       itemText: '',
       avatarSource: {}
     };
-    this.selectImage = this.selectImage.bind(this)
+    this.selectImage = this.selectImage.bind(this);
+  }
+
+  componentWillMount () {
+    const jsonPath = RNFS.DocumentDirectoryPath + '/list.json';
+    RNFS.readFile(jsonPath)
+      .then((data) => {
+        this.setState({
+          itemArray: data ? JSON.parse(data) : []
+        })
+      })
+  }
+
+  storageFunc(data) {
+    const jsonPath = RNFS.DocumentDirectoryPath + '/list.json';
+    RNFS.writeFile(jsonPath, JSON.stringify(data));
+    this.setState({
+      itemArray: data
+    })
   }
 
   addItem() {
@@ -25,15 +44,20 @@ export default class App extends React.Component {
         'description': this.state.itemText,
         'url': this.state.avatarSource
       });
-      this.setState({ itemArray: this.state.itemArray});
-      this.setState({ itemText: '' });
-      this.setState({ avatarSource: {} });
+      this.storageFunc(this.state.itemArray);
+      this.setState({
+        itemArray: this.state.itemArray,
+        itemText: '',
+        avatarSource: {}
+      });
     }
   }
 
   deleteItem(key) {
-    this.state.itemArray.splice(key, 1);
-    this.setState({ itemArray: this.state.itemArray})
+    var list = this.state.itemArray;
+    list.splice(key, 1);
+    this.setState({ itemArray: list});
+    this.storageFunc(list);
   }
 
   selectImage () {
@@ -45,7 +69,7 @@ export default class App extends React.Component {
       }
     };
     ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response)
+      console.log('Response = ', response);
 
       if (response.didCancel) {
         console.log('User cancelled image picker')
@@ -57,15 +81,15 @@ export default class App extends React.Component {
         console.log('User tapped custom button: ', response.customButton)
       }
       else {
-        let filePath = RNFS.DocumentDirectoryPath + '/test-image.jpeg'
-        console.log('response', response)
+        let filePath = RNFS.DocumentDirectoryPath + '/test-image.jpeg';
+        console.log('response', response);
         RNFS.writeFile(filePath, response.data, 'base64')
           .then(() => {
             console.log('saved file', filePath)
           })
           .catch(err => {
             console.log('error save file', err)
-          })
+          });
         this.setState({
           avatarSource: { uri: response.uri }
           // avatarSource: { uri: 'file://' + filePath }
@@ -74,12 +98,20 @@ export default class App extends React.Component {
     })
   }
 
+  editItem(key) {
+    var list = this.state.itemArray;
+    list[key].isEdit = true;
+    this.setState({ itemArray: list});
+    this.storageFunc(list);
+  }
+
   render() {
     let items = this.state.itemArray.map((val, key) => {
-      return <Item key={key} keyval={key} val={val} deleteItemMethod={
-        () => this.deleteItem(key)
-      } />
-    })
+      return <Item key={key} keyval={key} val={val}
+                   editItemMethod={() => this.editItem(key)}
+                   deleteItemMethod={() => this.deleteItem(key)}
+      />
+    });
     return (
       <View style={styles.container}>
         <View style={styles.header}>
@@ -92,6 +124,9 @@ export default class App extends React.Component {
             Upload image
           </Text>
         </TouchableOpacity>
+        <View>
+          <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
+        </View>
         <View style={styles.footer}>
           <TextInput
             style={styles.textInput}
@@ -104,9 +139,6 @@ export default class App extends React.Component {
           <TouchableOpacity onPress={this.addItem.bind(this)} style={styles.addItem}>
             <Text style={styles.addItemText}>Add</Text>
           </TouchableOpacity>
-        </View>
-        <View>
-          <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
         </View>
         <ScrollView style={styles.scrollWrapper}>
           {items}

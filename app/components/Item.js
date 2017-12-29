@@ -16,9 +16,14 @@ export default class Item extends React.Component {
             <Text style={styles.dateText}>{this.props.val.date}</Text>
             <Text style={styles.itemDescription}>{this.props.val.description}</Text>
           </View>
-          <TouchableOpacity onPress={this.props.deleteItemMethod}>
-            <Text style={styles.deleteText}>X</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonsBox}>
+            <TouchableOpacity onPress={this.props.editItemMethod}>
+              <Text style={styles.deleteText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={this.props.deleteItemMethod}>
+              <Text style={styles.deleteText}>X</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -43,7 +48,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 5,
   },
+  buttonsBox: {
+    flexDirection: 'row',
+  },
   deleteText: {
+    marginLeft: 5,
     padding: 10,
     color: 'white',
     backgroundColor: 'teal',
