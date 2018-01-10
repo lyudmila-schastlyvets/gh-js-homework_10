@@ -137,7 +137,7 @@ export default class App extends React.Component {
             Upload image
           </Text>
         </TouchableOpacity>
-        <View>
+        <View style={styles.imageBox}>
           <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
         </View>
         <View style={styles.footer}>
@@ -215,9 +215,16 @@ const styles = StyleSheet.create({
     color: 'blue',
     textAlign: 'center'
   },
+  imageBox: {
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
   uploadAvatar: {
-    width: 50,
-    height: 50,
-    backgroundColor: 'white'
+    width: 100,
+    height: 100,
+    backgroundColor: 'white',
+    borderRadius: 4,
+    borderWidth: 5,
+    borderColor: 'teal'
   }
 });
