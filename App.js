@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, TextInput, ScrollView, TouchableOpacity, Image, DatePickerAndroid } from 'react-native';
 import Item from './app/components/Item';
 import ImagePicker from 'react-native-image-picker'
 import RNFS from 'react-native-fs'
@@ -11,10 +11,12 @@ export default class App extends React.Component {
       id: '',
       itemArray: [],
       itemText: '',
-      avatarSource: {}
+      avatarSource: {},
+      date: null
     };
     this.selectImage = this.selectImage.bind(this);
     this.saveChangedItem = this.saveChangedItem.bind(this);
+    this.selectDate = this.selectDate.bind(this);
   }
 
   componentWillMount () {
@@ -39,11 +41,35 @@ export default class App extends React.Component {
     })
   }
 
+  async selectDate() {
+    try {
+      const {action, year, month, day} = await DatePickerAndroid.open({
+        date: new Date()
+      });
+
+      if (typeof year == 'undefined') {
+        var itemDate = new Date();
+        this.setState({
+          date: itemDate.getFullYear() + '/'
+          + (itemDate.getMonth() + 1) + '/'
+          + itemDate.getDate()
+        });
+      } else {
+        this.setState({
+          date: year + '/' + (month + 1) + '/' + day
+        });
+      }
+
+    } catch ({code, message}) {
+      console.warn('Cannot open date picker', message);
+    }
+  }
+
   addItem() {
     if (this.state.itemText) {
       var itemDate = new Date();
       this.state.itemArray.push( {
-        'date': itemDate.getFullYear() + '/'
+        'date': this.state.date || itemDate.getFullYear() + '/'
         + (itemDate.getMonth() + 1) + '/'
         + itemDate.getDate(),
         'description': this.state.itemText,
@@ -53,7 +79,8 @@ export default class App extends React.Component {
       this.setState({
         itemArray: this.state.itemArray,
         itemText: '',
-        avatarSource: {}
+        avatarSource: {},
+        date: null
       });
     }
   }
@@ -117,6 +144,7 @@ export default class App extends React.Component {
       itemArray: this.state.itemArray
     });
   }
+
   render() {
     let items = this.state.itemArray.map((val, key) => {
       return <Item key={key} keyval={key} val={val}
@@ -130,13 +158,19 @@ export default class App extends React.Component {
         <View style={styles.header}>
           <Text style={styles.headerText}>TODO List</Text>
         </View>
-        <TouchableOpacity
-          style={styles.photoButton}
-          onPress={this.selectImage}>
-          <Text style={styles.photoButtonText}>
-            Upload image
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity onPress={this.selectDate} style={styles.dateButton} >
+            {this.state.date === null ? <Text style={styles.addItemText}>Date</Text> :
+              <Text style={styles.addItemText}>{this.state.date}</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={this.selectImage}>
+            <Text style={styles.addItemText}>
+              Upload image
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.imageBox}>
           <Image source={this.state.avatarSource} style={styles.uploadAvatar} />
         </View>
@@ -175,6 +209,10 @@ const styles = StyleSheet.create({
     padding: 20,
     color: 'white',
   },
+  buttonsContainer: {
+    padding: 5,
+    flexDirection: 'row',
+  },
   scrollWrapper: {
     padding: 5,
   },
@@ -197,22 +235,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   addItemText: {
+    padding: 5,
     color: 'white',
+  },
+  dateButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 5,
+    margin: 5,
+    height: 40,
+    width: 110,
+    backgroundColor: 'teal',
+    borderRadius: 10,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  photoButton: {
-    flex: 0,
-    padding: 20,
-    marginBottom: 10,
-    backgroundColor: 'grey',
-    justifyContent: 'center'
-  },
-  photoButtonText: {
-    color: 'blue',
     textAlign: 'center'
   },
   imageBox: {

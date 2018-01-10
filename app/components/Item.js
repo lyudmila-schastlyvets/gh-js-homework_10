@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    maxWidth: 250,
+    maxWidth: 250
   },
   image: {
     flex: 1,
