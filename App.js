@@ -14,16 +14,21 @@ export default class App extends React.Component {
       avatarSource: {}
     };
     this.selectImage = this.selectImage.bind(this);
+    this.saveChangedItem = this.saveChangedItem.bind(this);
   }
 
   componentWillMount () {
     const jsonPath = RNFS.DocumentDirectoryPath + '/list.json';
-    RNFS.readFile(jsonPath)
-      .then((data) => {
-        this.setState({
-          itemArray: data ? JSON.parse(data) : []
+    if (RNFS.exists(jsonPath)) {
+      RNFS.readFile(jsonPath)
+        .then((data) => {
+          this.setState({
+            itemArray: data ? JSON.parse(data) : []
+          })
         })
-      })
+    } else {
+      this.storageFunc([]);
+    }
   }
 
   storageFunc(data) {
@@ -105,11 +110,19 @@ export default class App extends React.Component {
     this.storageFunc(list);
   }
 
+  saveChangedItem(key) {
+    this.state.itemArray[key]['isEdit'] = false;
+    this.storageFunc(this.state.itemArray);
+    this.setState({
+      itemArray: this.state.itemArray
+    });
+  }
   render() {
     let items = this.state.itemArray.map((val, key) => {
       return <Item key={key} keyval={key} val={val}
                    editItemMethod={() => this.editItem(key)}
                    deleteItemMethod={() => this.deleteItem(key)}
+                   saveItemMethod={() => this.saveChangedItem(key)}
       />
     });
     return (
@@ -167,7 +180,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: 5,
-    flex: 1,
+    height: 50,
     flexDirection: 'row'
   },
   textInput: {
