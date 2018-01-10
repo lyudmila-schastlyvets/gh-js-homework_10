@@ -28,7 +28,7 @@ export default class Item extends React.Component {
                 style={styles.input}
                 defaultValue={this.props.val.description}
                 onChangeText={(desc) => this.props.val.description = desc}
-              ></TextInput> : <Text style={styles.itemDescription}>{this.props.val.description}</Text>}
+              /> : <Text style={styles.itemDescription}>{this.props.val.description}</Text>}
           </View>
           <View style={styles.buttonsBox}>
             {this.props.val.isEdit ?

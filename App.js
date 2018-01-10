@@ -148,7 +148,7 @@ export default class App extends React.Component {
               this.setState({itemText})
             }
             value={this.state.itemText}
-          ></TextInput>
+          />
           <TouchableOpacity onPress={this.addItem.bind(this)} style={styles.addItem}>
             <Text style={styles.addItemText}>Add</Text>
           </TouchableOpacity>
